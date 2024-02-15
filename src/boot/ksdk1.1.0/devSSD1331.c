@@ -20,14 +20,14 @@ volatile uint8_t	payloadBytes[1];
 /*
  *	Override Warp firmware's use of these pins and define new aliases.
  */
-enum
-{
-	kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
-	kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
-	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
-	kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
-	kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
-};
+// enum
+// {
+// 	kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
+// 	kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
+// 	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
+// 	kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
+// 	kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
+// };
 
 static int
 writeCommand(uint8_t commandByte)
@@ -77,7 +77,7 @@ devSSD1331init(void)
 	PORT_HAL_SetMuxMode(PORTA_BASE, 8u, kPortMuxAlt3);
 	PORT_HAL_SetMuxMode(PORTA_BASE, 9u, kPortMuxAlt3);
 
-	enableSPIpins();
+	warpEnableSPIpins();
 
 	/*
 	 *	Override Warp firmware's use of these pins.
@@ -146,6 +146,11 @@ devSSD1331init(void)
 	writeCommand(kSSD1331CommandFILL);
 	writeCommand(0x01);
 
+
+
+
+
+
 	/*
 	 *	Clear Screen
 	 */
@@ -160,7 +165,24 @@ devSSD1331init(void)
 	/*
 	 *	Any post-initialization drawing commands go here.
 	 */
-	//...
+	// Enter "draw rectangle mode"
+	writeCommand(0x22);
+	writeCommand(0x00); // Starting column coordinates
+	writeCommand(0x00); // Starting row coordinates
+	writeCommand(0x5F); // Finishing column coordinates (for 96 pixels wide display)
+	writeCommand(0x3F); // Finishing row coordinates (for 64 pixels high display)
+
+	// Outline color set to the brightest green (0d for red, 63d for green, 0d for blue)
+	writeCommand(0x00); // Red component of the outline color
+	writeCommand(0xFF); // Green component of the outline color (brightest green)
+	writeCommand(0x00); // Blue component of the outline color
+
+	// Fill color set to the brightest green (same as outline color)
+	writeCommand(0x00); // Red component of the fill color
+	writeCommand(0xFF); // Green component of the fill color (brightest green)
+	writeCommand(0x00); // Blue component of the fill color
+
+
 
 
 

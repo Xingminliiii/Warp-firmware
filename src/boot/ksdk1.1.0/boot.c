@@ -86,6 +86,7 @@
 #include "devCCS811.h"
 #include "devHDC1000.h"
 #include "devRV8803C7.h"
+#include "devSSD1331.h"
 
 
 #if (WARP_BUILD_ENABLE_DEVADXL362)
@@ -121,6 +122,7 @@
 #if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 	volatile WarpI2CDeviceState			deviceMMA8451QState;
 #endif
+
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 	#include "devLPS25H.h"
@@ -1677,6 +1679,12 @@ main(void)
 		initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVSSD1331)
+		// initSSD1331(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsSSD1331	);
+	
+		devSSD1331init();
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 		initLPS25H(	0x5C	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsLPS25H	);
 #endif
@@ -2106,6 +2114,12 @@ main(void)
 					warpPrint("\r\t- '5' MMA8451Q			(0x00--0x31): 1.95V -- 3.6V (compiled out) \n");
 #endif
 
+// #if (WARP_BUILD_ENABLE_DEVSSD1331)
+// 					warpPrint("\r\t- '5' SSD1331			(0x00--0x31): 1.95V -- 3.6V\n");
+// #else
+// 					warpPrint("\r\t- '5' SSD1331			(0x00--0x31): 1.95V -- 3.6V (compiled out) \n");
+// #endif
+
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 					warpPrint("\r\t- '6' LPS25H			(0x08--0x24): 1.7V -- 3.6V\n");
 #else
@@ -2223,10 +2237,19 @@ main(void)
 					case '5':
 					{
 						menuTargetSensor = kWarpSensorMMA8451Q;
-							menuI2cDevice = &deviceMMA8451QState;
+						menuI2cDevice = &deviceMMA8451QState;
 						break;
 					}
 #endif
+
+// #if (WARP_BUILD_ENABLE_DEVSSD1331)
+// 					case '5':
+// 					{
+// 						menuTargetSensor = kWarpSensorSSD1331;
+// 							menuI2cDevice = &deviceSSD1331State;
+// 						break;
+// 					}
+// #endif
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 					case '6':
@@ -3203,6 +3226,14 @@ writeAllSensorsToFlash(int menuDelayBetweenEachRun, int loopForever)
 	sensorBitField = sensorBitField | kWarpFlashMMA8451QBitField;
 #endif
 
+// #if (WARP_BUILD_ENABLE_DEVSSD1331)
+// 	numberOfConfigErrors += configureSensorSSD1331(
+// 		0x00, /* Payload: Disable FIFO */
+// 		0x01  /* Normal read 8bit, 800Hz, normal, active mode */
+// 	);
+// 	sensorBitField = sensorBitField | kWarpFlashSSD1331BitField;
+// #endif
+
 #if (WARP_BUILD_ENABLE_DEVMAG3110)
 	numberOfConfigErrors += configureSensorMAG3110(
 		0x00, /*	Payload: DR 000, OS 00, 80Hz, ADC 1280, Full 16bit, standby mode
@@ -3338,6 +3369,10 @@ writeAllSensorsToFlash(int menuDelayBetweenEachRun, int loopForever)
 #if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 		bytesWrittenIndex += appendSensorDataMMA8451Q(flashWriteBuf + bytesWrittenIndex);
 #endif
+
+// #if (WARP_BUILD_ENABLE_DEVSSD1331)
+// 		bytesWrittenIndex += appendSensorDataSSD1331(flashWriteBuf + bytesWrittenIndex);
+// #endif
 
 #if (WARP_BUILD_ENABLE_DEVMAG3110)
 		bytesWrittenIndex += appendSensorDataMAG3110(flashWriteBuf + bytesWrittenIndex);
