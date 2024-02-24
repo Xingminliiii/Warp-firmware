@@ -59,7 +59,7 @@
  *	The commented line below should never be uncommented. It is just here to stress a point that
  *	you shouldn't try to enable the Glaux build in this way.
  */
-// #define		WARP_BUILD_ENABLE_FRDMKL03			0
+// #define		WARP_BUILD_ENABLE_FRDMKL03			1
 
 /*
  *	Force the required configuration if WARP_BUILD_ENABLE_GLAUX_VARIANT is set
@@ -82,10 +82,11 @@
 #define WARP_BUILD_ENABLE_DEVLPS25H   0
 #define WARP_BUILD_ENABLE_DEVMAG3110  0
 #define WARP_BUILD_ENABLE_DEVMMA8451Q 0
-#define WARP_BUILD_ENABLE_DEVRV8803C7 1
+#define WARP_BUILD_ENABLE_DEVRV8803C7 0
 #define WARP_BUILD_ENABLE_DEVSI4705   0
 #define WARP_BUILD_ENABLE_DEVSI7021   0
 #define WARP_BUILD_ENABLE_DEVTCS34725 0
+#define WARP_BUILD_ENABLE_DEVSSD1331  1
 #elif (WARP_BUILD_ENABLE_FRDMKL03)
 #define WARP_BUILD_ENABLE_DEVADXL362  0
 #define WARP_BUILD_ENABLE_DEVAMG8834  0
@@ -104,11 +105,12 @@
 #define WARP_BUILD_ENABLE_DEVLPS25H   0
 #define WARP_BUILD_ENABLE_DEVMAG3110  0
 #define WARP_BUILD_ENABLE_DEVMMA8451Q 0
+#define WARP_BUILD_ENABLE_DEVINA219   1
 #define WARP_BUILD_ENABLE_DEVRV8803C7 0
 #define WARP_BUILD_ENABLE_DEVSI4705   0
 #define WARP_BUILD_ENABLE_DEVSI7021   0
 #define WARP_BUILD_ENABLE_DEVTCS34725 0
-#define WARP_BUILD_ENABLE_DEVSSD1331 1
+#define WARP_BUILD_ENABLE_DEVSSD1331  0
 #else
 /*
  *	Otherwise: Edit these to set which code paths are activated in the firmware compilation
@@ -181,6 +183,7 @@ typedef enum
 	kWarpDefaultSupplyVoltageMillivoltsBMX055gyro  = 2600,
 	kWarpDefaultSupplyVoltageMillivoltsBMX055mag   = 2600,
 	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q    = 1800,
+	kWarpDefaultSupplyVoltageMillivoltsINA219    = 1800,
 	kWarpDefaultSupplyVoltageMillivoltsLPS25H      = 1800,
 	kWarpDefaultSupplyVoltageMillivoltsHDC1000     = 1800,
 	kWarpDefaultSupplyVoltageMillivoltsMAG3110     = 1800,
