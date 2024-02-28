@@ -1683,13 +1683,15 @@ main(void)
 		initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 #endif
 
-#if (WARP_BUILD_ENABLE_DEVINA219)
-		initINA219(	0x40	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsINA219	);
-#endif
 
 #if (WARP_BUILD_ENABLE_DEVSSD1331)
 	
 		devSSD1331init();
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVINA219)
+		initINA219(	0x40	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsINA219	);
+
 #endif
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
@@ -1931,6 +1933,27 @@ main(void)
 
 	bool _originalWarpExtraQuietMode = gWarpExtraQuietMode;
 	gWarpExtraQuietMode = false;
+
+// /*
+//  * Run Display initialisation and Current Measurement code 
+//  */
+// #if (WARP_BUILD_ENABLE_FRDMKL03)
+    warpPrint("\n\rRUNNING OLED INIT CODE HERE\n");
+    devSSD1331init();
+    warpPrint("\n\rDONE RUNNING OLED INIT CODE HERE\n");
+    
+    OSA_TimeDelay(100); // time for current to stabilise
+
+    warpPrint("\n\rRUNNING CURRENT MEASUREMENT CODE HERE\n");
+	int32_t current_uA = getCurrent_uA_INA219(1);
+
+	warpPrint("%duA\n", current_uA, "uA");
+
+    // // uint32_t time = OSA_TimeGetMsec(10);
+    // warpPrint("%d, %d, %d, %d, %d\n", current_uA, bus_mV, shunt_uV, power_uW);
+	// warpPrint(" INA219 Shunt, INA219 Bus, INA219 Power, INA219 Current");
+
+// #endif 
 	warpPrint("Press any key to show menu...\n");
 	gWarpExtraQuietMode = _originalWarpExtraQuietMode;
 
@@ -2035,6 +2058,8 @@ main(void)
 	}
 #endif
 
+	
+
 	while (1)
 	{
 		/*
@@ -2121,11 +2146,6 @@ main(void)
 					warpPrint("\r\t- '5' MMA8451Q			(0x00--0x31): 1.95V -- 3.6V (compiled out) \n");
 #endif
 
-// #if (WARP_BUILD_ENABLE_DEVSSD1331)
-// 					warpPrint("\r\t- '5' SSD1331			(0x00--0x31): 1.95V -- 3.6V\n");
-// #else
-// 					warpPrint("\r\t- '5' SSD1331			(0x00--0x31): 1.95V -- 3.6V (compiled out) \n");
-// #endif
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 					warpPrint("\r\t- '6' LPS25H			(0x08--0x24): 1.7V -- 3.6V\n");
@@ -2249,14 +2269,6 @@ main(void)
 					}
 #endif
 
-// #if (WARP_BUILD_ENABLE_DEVSSD1331)
-// 					case '5':
-// 					{
-// 						menuTargetSensor = kWarpSensorSSD1331;
-// 							menuI2cDevice = &deviceSSD1331State;
-// 						break;
-// 					}
-// #endif
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 					case '6':
@@ -3377,9 +3389,6 @@ writeAllSensorsToFlash(int menuDelayBetweenEachRun, int loopForever)
 		bytesWrittenIndex += appendSensorDataMMA8451Q(flashWriteBuf + bytesWrittenIndex);
 #endif
 
-// #if (WARP_BUILD_ENABLE_DEVSSD1331)
-// 		bytesWrittenIndex += appendSensorDataSSD1331(flashWriteBuf + bytesWrittenIndex);
-// #endif
 
 #if (WARP_BUILD_ENABLE_DEVMAG3110)
 		bytesWrittenIndex += appendSensorDataMAG3110(flashWriteBuf + bytesWrittenIndex);

@@ -155,10 +155,6 @@ typedef enum
 	kWarpSensorConfigurationRegisterBME680CalibrationRegion1End		= 0xA2,
 	kWarpSensorConfigurationRegisterBME680CalibrationRegion2Start	= 0xE1,
 	kWarpSensorConfigurationRegisterBME680CalibrationRegion2End		= 0xF2,
-
-	kWarpSensorConfigurationRegisterINA219Configuration             = 0x00,
-    kWarpSensorConfigurationRegisterINA219Calibration               = 0x05,
-
 	/*
 	 *	See Table 4 of the ISL23415 manual. We choose to use the encoding
 	 *	where we always set R4:R0 to 0000
