@@ -22,11 +22,11 @@ volatile uint8_t	payloadBytes[1];
  */
 // enum
 // {
-	// kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
-	// kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
-	// kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
-	// kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
-	// kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
+// 	kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
+// 	kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
+// 	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
+// 	kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
+// 	kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
 // };
 
 static int
@@ -165,6 +165,29 @@ devSSD1331init(void)
 	/*
 	 *	Any post-initialization drawing commands go here.
 	 */
+	
+	  //set max contrast (0xFF) on each colour channel for brightest green
+    writeCommand(kSSD1331CommandCONTRASTA);		// 0x81
+	writeCommand(0xFF);
+	writeCommand(kSSD1331CommandCONTRASTB);		// 0x82
+	writeCommand(0xFF);
+	writeCommand(kSSD1331CommandCONTRASTC);		// 0x83
+	writeCommand(0xFF);
+    
+    // set highest precharge level possible and highest speed for max brightness
+	writeCommand(kSSD1331CommandPRECHARGEA);	// 0x8A
+	writeCommand(0xFF);
+	writeCommand(kSSD1331CommandPRECHARGEB);	// 0x8B
+	writeCommand(0xFF);
+	writeCommand(kSSD1331CommandPRECHARGEA);	// 0x8C
+	writeCommand(0xFF);
+	writeCommand(kSSD1331CommandPRECHARGELEVEL);	// 0xBB
+	writeCommand(0x3E);	
+
+    // set maximum pixel current for maximum brightness
+	writeCommand(kSSD1331CommandMASTERCURRENT);	// 0x87
+	writeCommand(0x0F);
+
 	//Enter "draw rectangle mode"
 	writeCommand(0x22);
 	writeCommand(0x00); // Starting column coordinates
@@ -174,12 +197,12 @@ devSSD1331init(void)
 
 	// Outline color set to the brightest green (0d for red, 63d for green, 0d for blue)
 	writeCommand(0x00); // Red component of the outline color
-	writeCommand(0x3F); // Green component of the outline color (brightest green)
+	writeCommand(0xFF); // Green component of the outline color (brightest green)
 	writeCommand(0x00); // Blue component of the outline color
 
 	// Fill color set to the brightest green (same as outline color)
 	writeCommand(0x00); // Red component of the fill color
-	writeCommand(0x3F); // Green component of the fill color (brightest green)
+	writeCommand(0xFF); // Green component of the fill color (brightest green)
 	writeCommand(0x00); // Blue component of the fill color
 
 

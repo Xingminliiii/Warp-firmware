@@ -156,6 +156,9 @@ typedef enum
 	kWarpSensorConfigurationRegisterBME680CalibrationRegion2Start	= 0xE1,
 	kWarpSensorConfigurationRegisterBME680CalibrationRegion2End		= 0xF2,
 
+	kWarpSensorConfigurationRegisterINA219Configuration             = 0x00,
+    kWarpSensorConfigurationRegisterINA219Calibration               = 0x05,
+
 	/*
 	 *	See Table 4 of the ISL23415 manual. We choose to use the encoding
 	 *	where we always set R4:R0 to 0000
@@ -255,6 +258,13 @@ typedef enum
 	kWarpSensorOutputRegisterADXL362FIFO_SAMPLES			= 0x29,
 	kWarpSensorOutputRegisterADXL362FILTER_CTL			= 0x2C,
 	kWarpSensorOutputRegisterADXL362POWER_CTL			= 0x2D,
+
+	kWarpSensorOutputRegisterINA219Config				= 0x00,
+	kWarpSensorOutputRegisterINA219ShuntV				= 0x01,
+	kWarpSensorOutputRegisterINA219BusV		            = 0x02,
+    kWarpSensorOutputRegisterINA219Current		        = 0x03,
+	kWarpSensorOutputRegisterINA219Power	            = 0x04,
+	kWarpSensorOutputRegisterINA219Calibration	        = 0x05,
 
 
 } WarpSensorOutputRegister;
