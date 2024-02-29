@@ -1945,7 +1945,8 @@ main(void)
 
     warpPrint("\n\rMeasure Current\n");
 	//getCurrent_uA_INA219(1);
-
+    //warpPrint("%d",getCurrent_raw_INA219(1));
+	printSensorDataINA219(1);
 	warpPrint("%duA\n", getCurrent_uA_INA219(1));
 
 
@@ -2214,16 +2215,32 @@ main(void)
 					warpPrint("\r\t- 'k' AS7263			(0x00--0x2B): 2.7V -- 3.6V (compiled out) \n");
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVINA219)
+					warpPrint("\r\t- 'i' INA219			(0x00--0x05): 2.7V -- 3.6V\n");
+#else
+					warpPrint("\r\t- 'i' INA219			(0x00--0x05): 2.7V -- 3.6V (compiled out) \n");
+#endif
+
 				warpPrint("\r\tEnter selection> ");
 				key = warpWaitKey();
 
 				switch(key)
 				{
+
 #if (WARP_BUILD_ENABLE_DEVADXL362)
 					case '1':
 					{
 						menuTargetSensor = kWarpSensorADXL362;
 
+						break;
+					}
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVINA219)
+					case 'i':
+					{
+						menuTargetSensor = kWarpSensorINA219;
+						menuI2cDevice = &deviceINA219State;
 						break;
 					}
 #endif
@@ -2364,6 +2381,8 @@ main(void)
 						break;
 					}
 #endif
+
+
 					default:
 					{
 						warpPrint("\r\tInvalid selection '%c' !\n", key);
@@ -3240,13 +3259,6 @@ writeAllSensorsToFlash(int menuDelayBetweenEachRun, int loopForever)
 	sensorBitField = sensorBitField | kWarpFlashMMA8451QBitField;
 #endif
 
-// #if (WARP_BUILD_ENABLE_DEVSSD1331)
-// 	numberOfConfigErrors += configureSensorSSD1331(
-// 		0x00, /* Payload: Disable FIFO */
-// 		0x01  /* Normal read 8bit, 800Hz, normal, active mode */
-// 	);
-// 	sensorBitField = sensorBitField | kWarpFlashSSD1331BitField;
-// #endif
 
 #if (WARP_BUILD_ENABLE_DEVMAG3110)
 	numberOfConfigErrors += configureSensorMAG3110(
@@ -3743,7 +3755,7 @@ loopForSensor(	const char *  tagString,
 	int			nCorrects = 0;
 	int			nBadCommands = 0;
 	uint16_t		actualSssupplyMillivolts = sssupplyMillivolts;
-
+	int numberOfBytes = (!strcmp(tagString, "\r\nINA219:\n\r")) ? 2 : 1; //read 2 bytes from INA219
 
 	if (	(!spiDeviceState && !i2cDeviceState) ||
 		(spiDeviceState && i2cDeviceState) )
@@ -3762,7 +3774,7 @@ loopForSensor(	const char *  tagString,
 	{
 		for (int i = 0; i < readCount; i++) for (int j = 0; j < chunkReadsPerAddress; j++)
 			{
-			status = readSensorRegisterFunction(address+j, 1 /* numberOfBytes */);
+			status = readSensorRegisterFunction(address+j, numberOfBytes/* numberOfBytes */);
 				if (status == kWarpStatusOK)
 				{
 					nSuccesses++;
@@ -3918,6 +3930,34 @@ repeatRegisterReadForDeviceAndAddress(WarpSensorDevice warpSensorDevice, uint8_t
 			break;
 		}
 
+		case kWarpSensorINA219:
+		{
+/*
+ *	MMA8451Q: VDD 1.95--3.6
+ */
+#if (WARP_BUILD_ENABLE_DEVINA219)
+				loopForSensor(	"\r\nINA219:\n\r",		/*	tagString			*/
+						&readSensorRegisterINA219,	/*	readSensorRegisterFunction	*/
+						&deviceINA219State,		/*	i2cDeviceState			*/
+						NULL,				/*	spiDeviceState			*/
+						baseAddress,			/*	baseAddress			*/
+						0x00,				/*	minAddress			*/
+						0x05,				/*	maxAddress			*/
+						repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+						chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+						spinDelay,			/*	spinDelay			*/
+						autoIncrement,			/*	autoIncrement			*/
+						sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+						referenceByte,			/*	referenceByte			*/
+						adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+						chatty				/*	chatty				*/
+			);
+#else
+			warpPrint("\r\n\tINA219 Read Aborted. Device Disabled :(");
+#endif
+
+			break;
+		}
 		case kWarpSensorBME680:
 		{
 /*
