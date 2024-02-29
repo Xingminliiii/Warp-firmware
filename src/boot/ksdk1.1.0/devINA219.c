@@ -552,7 +552,7 @@ int32_t getBusVoltage_mV_INA219()
  *          config settings and current LSB
  *  @return the current reading convereted to microamps
  */
-int32_t getCurrent_uA_INA219()
+int32_t getCurrentINA219()
 {
     int16_t valueDec = getCurrent_raw_INA219();
     valueDec *= ina219_currentMultiplier_uA;

@@ -1941,13 +1941,12 @@ main(void)
     warpPrint("\n\rINITIALISE OLED\n");
     devSSD1331init();
     
-    OSA_TimeDelay(500); // delay time to get the current to stablise it 
+    OSA_TimeDelay(100); // delay time to get the current to stablise it 
 
-    warpPrint("\n\rMeasure Current\n");
-	//getCurrent_uA_INA219(1);
-    //warpPrint("%d",getCurrent_raw_INA219(1));
+	warpPrint("\n\rPrint 16 bit register in order is: Shunt Voltage, Bus Voltage, Power, Current\n");
 	printSensorDataINA219(1);
-	warpPrint("%duA\n", getCurrent_uA_INA219(1));
+	warpPrint("\n\rMeasure Current\n");
+	warpPrint("%duA\n", getCurrentINA219(1));
 
 
 	warpPrint("Press any key to show menu...\n");
@@ -3809,9 +3808,17 @@ loopForSensor(	const char *  tagString,
 
 						if (chatty)
 						{
-						warpPrint("\r\t0x%02x --> 0x%02x\n",
-							address+j,
-									  i2cDeviceState->i2cBuffer[0]);
+						if (numberOfBytes == 1){
+                                warpPrint("\r\t0x%02x --> 0x%02x\n",
+                                            address+j,
+                                            i2cDeviceState->i2cBuffer[0]);
+                            }
+                            else {
+                                warpPrint("\r\t0x%02x --> 0x%02x%02x\n",
+                                            address+j,
+                                            i2cDeviceState->i2cBuffer[0],
+                                            i2cDeviceState->i2cBuffer[1]);
+                            }
 						}
 					}
 				}
