@@ -1934,26 +1934,21 @@ main(void)
 	bool _originalWarpExtraQuietMode = gWarpExtraQuietMode;
 	gWarpExtraQuietMode = false;
 
-// /*
-//  * Run Display initialisation and Current Measurement code 
-//  */
-// #if (WARP_BUILD_ENABLE_FRDMKL03)
-    warpPrint("\n\rRUNNING OLED INIT CODE HERE\n");
+/*
+ * Modify boot.c to initialise OLED and show current measurement before 
+ entering the warp menu
+ */
+    warpPrint("\n\rINITIALISE OLED\n");
     devSSD1331init();
-    warpPrint("\n\rDONE RUNNING OLED INIT CODE HERE\n");
     
-    OSA_TimeDelay(100); // time for current to stabilise
+    OSA_TimeDelay(500); // delay time to get the current to stablise it 
 
-    warpPrint("\n\rRUNNING CURRENT MEASUREMENT CODE HERE\n");
-	int32_t current_uA = getCurrent_uA_INA219(1);
+    warpPrint("\n\rMeasure Current\n");
+	//getCurrent_uA_INA219(1);
 
-	warpPrint("%duA\n", current_uA, "uA");
+	warpPrint("%duA\n", getCurrent_uA_INA219(1));
 
-    // // uint32_t time = OSA_TimeGetMsec(10);
-    // warpPrint("%d, %d, %d, %d, %d\n", current_uA, bus_mV, shunt_uV, power_uW);
-	// warpPrint(" INA219 Shunt, INA219 Bus, INA219 Power, INA219 Current");
 
-// #endif 
 	warpPrint("Press any key to show menu...\n");
 	gWarpExtraQuietMode = _originalWarpExtraQuietMode;
 
