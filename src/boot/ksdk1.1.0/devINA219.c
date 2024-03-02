@@ -34,7 +34,6 @@ int16_t ina219_powerMultiplier_uW;
 uint16_t ina219_calValue;
 
 void setCalibration_lzb();
-void setCalibration_lzb_double_cal();
 
 void
 initINA219(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
@@ -43,7 +42,6 @@ initINA219(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
 	deviceINA219State.operatingVoltageMillivolts	= operatingVoltageMillivolts;
 
     setCalibration_lzb();
-
 	return;
 }
 
@@ -421,7 +419,7 @@ setCalibration_lzb()
 {
 
 
-    ina219_calValue = 58514;
+    ina219_calValue = 20480;
 
     // Set multipliers to convert raw current/power values
     ina219_currentMultiplier_uA = 7;    // Current LSB = 5uA per bit 
@@ -431,36 +429,11 @@ setCalibration_lzb()
     writeSensorRegisterINA219(INA219_REG_CALIBRATION, ina219_calValue);
 
     // Set Config register to take into account the settings above
-    uint16_t config = INA219_CONFIG_BVOLTAGERANGE_16V |
-                      INA219_CONFIG_GAIN_1_40MV | INA219_CONFIG_BADCRES_12BIT |
-                      INA219_CONFIG_SADCRES_12BIT_1S_532US |
-                      INA219_CONFIG_MODE_SANDBVOLT_CONTINUOUS;
+    //uint16_t config = 0b0000000110011111;
 
-    writeSensorRegisterINA219(INA219_REG_CONFIG, config);
+    writeSensorRegisterINA219(INA219_REG_CONFIG, (uint16_t) 0b0000000110011111);
 }
 
-void
-setCalibration_lzb_double_cal()
-{
-
-
-    ina219_calValue = 58514;
-
-    // Set multipliers to convert raw current/power values
-    ina219_currentMultiplier_uA = 7;    // Current LSB = 5uA per bit 
-    ina219_powerMultiplier_uW = 0.14 * 1000; // Power LSB = 0.1mW per bit
-
-    // Set Calibration register to 'Cal' calculated above
-    writeSensorRegisterINA219(INA219_REG_CALIBRATION, ina219_calValue);
-
-    // Set Config register to take into account the settings above
-    uint16_t config = INA219_CONFIG_BVOLTAGERANGE_16V |
-                      INA219_CONFIG_GAIN_1_40MV | INA219_CONFIG_BADCRES_12BIT |
-                      INA219_CONFIG_SADCRES_12BIT_1S_532US |
-                      INA219_CONFIG_MODE_SANDBVOLT_CONTINUOUS;
-
-    writeSensorRegisterINA219(INA219_REG_CONFIG, config);
-}
 
 int16_t getBusVoltage_raw_INA219()
 {

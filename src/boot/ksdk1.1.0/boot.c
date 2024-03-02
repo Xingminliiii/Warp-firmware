@@ -1941,13 +1941,25 @@ main(void)
     warpPrint("\n\rINITIALISE OLED\n");
     devSSD1331init();
     
-    OSA_TimeDelay(100); // delay time to get the current to stablise it 
+    // OSA_TimeDelay(100); // delay time to get the current to stablise it 
 
-	warpPrint("\n\rPrint 16 bit register in order is: Shunt Voltage, Bus Voltage, Power, Current\n");
-	printSensorDataINA219(1);
-	warpPrint("\n\rMeasure Current\n");
-	warpPrint("%duA\n", getCurrentINA219(1));
-
+	// warpPrint("\n\rPrint 16 bit register in order is: Shunt Voltage, Bus Voltage, Power, Current\n");
+	// printSensorDataINA219(1);
+	// warpPrint("\n\rMeasure Current\n");
+	// warpPrint("%duA\n", getCurrentINA219(1));
+	// Open a file in write mode (this will overwrite existing files)
+    //fp = warpopen("output.csv", "w");
+	    for (int i = 0; i < 1000; i++)
+    {
+        int32_t bus_mV = getBusVoltage_mV_INA219();
+        int32_t shunt_uV = getShuntVoltage_uV_INA219();
+        int32_t current_uA = getCurrentINA219();	
+        int32_t power_uW = getPower_uW_INA219();
+        uint32_t time = OSA_TimeGetMsec();
+        warpPrint("%d, %d, %d, %d, %d\n", current_uA, bus_mV, shunt_uV, power_uW, time);
+    }
+	    // Close the file
+    //warpclose(fp);
 
 	warpPrint("Press any key to show menu...\n");
 	gWarpExtraQuietMode = _originalWarpExtraQuietMode;
