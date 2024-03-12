@@ -35,6 +35,8 @@
 	ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 	POSSIBILITY OF SUCH DAMAGE.
 */
+// define a struct to store acceleration file 
+
 
 void		initMMA8451Q(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
 WarpStatus	readSensorRegisterMMA8451Q(uint8_t deviceRegister, int numberOfBytes);
@@ -46,3 +48,22 @@ uint8_t		appendSensorDataMMA8451Q(uint8_t* buf);
 const uint8_t bytesPerMeasurementMMA8451Q            = 6;
 const uint8_t bytesPerReadingMMA8451Q                = 2;
 const uint8_t numberOfReadingsPerMeasurementMMA8451Q = 3;
+
+extern int accelerationX_mm_s2;
+extern int accelerationY_mm_s2;
+extern int accelerationZ_mm_s2;
+void readAndConvertAccelerations();
+
+#define BUFFER_SIZE 20 // Buffer size for 10 seconds of data at 5 Hz
+// // Declarations for the acceleration buffers
+// extern int accelerationBufferX[BUFFER_SIZE];
+// extern int accelerationBufferY[BUFFER_SIZE];
+// extern int accelerationBufferZ[BUFFER_SIZE];
+extern int totalSamples; // Total samples recorded
+// extern int currentIndex; // Current index in the buffer
+
+// // Declaration for the function to add a sample to the buffers
+// void addSampleToBuffer(int accelerationX_m_s2, int accelerationY_m_s2, int accelerationZ_m_s2);
+extern bool fall_detected = false;
+extern float svm;
+extern float theta; 

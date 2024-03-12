@@ -76,18 +76,19 @@
 /*
 * Include all sensors because they will be needed to decode flash.
 */
-#include "devADXL362.h"
-#include "devAMG8834.h"
+// #if (!WARP_BUILD_ENABLE_FRDMKL03)
+//     #include "devADXL362.h"
+//     #include "devAMG8834.h"
+//     #include "devMAG3110.h"
+//     #include "devL3GD20H.h"
+//     #include "devBME680.h"
+//     #include "devBMX055.h"
+//     #include "devCCS811.h"
+//     #include "devHDC1000.h"
+//     #include "devRV8803C7.h"
+// #endif
+
 #include "devMMA8451Q.h"
-#include "devMAG3110.h"
-#include "devL3GD20H.h"
-#include "devBME680.h"
-#include "devBMX055.h"
-#include "devCCS811.h"
-#include "devHDC1000.h"
-#include "devRV8803C7.h"
-#include "devSSD1331.h"
-//#include "devINA219.h"
 
 #if (WARP_BUILD_ENABLE_DEVADXL362)
 	volatile WarpSPIDeviceState			deviceADXL362State;
@@ -1934,80 +1935,27 @@ main(void)
 	bool _originalWarpExtraQuietMode = gWarpExtraQuietMode;
 	gWarpExtraQuietMode = false;
 
-/*
- * Modify boot.c to initialise OLED and show current measurement before 
- entering the warp menu
- */
-    // warpPrint("\n\rINITIALISE OLED\n");
-    // devSSD1331init();
-    
-    // // OSA_TimeDelay(100); // delay time to get the current to stablise it 
-
-	// // warpPrint("\n\rPrint 16 bit register in order is: Shunt Voltage, Bus Voltage, Power, Current\n");
-	// // printSensorDataINA219(1);
-	// // warpPrint("\n\rMeasure Current\n");
-	// // warpPrint("%duA\n", getCurrentINA219(1));
-	//     for (int i = 0; i < 1000; i++)
-    // {
-    //     int32_t bus_mV = getBusVoltage_mV_INA219();
-    //     int32_t shunt_uV = getShuntVoltage_uV_INA219();
-    //     int32_t current_uA = getCurrentINA219();	
-    //     int32_t power_uW = getPower_uW_INA219();
-    //     uint32_t time = OSA_TimeGetMsec();
-    //     warpPrint("%d, %d, %d, %d, %d\n", current_uA, bus_mV, shunt_uV, power_uW, time);
-    // }
 
 /*
  * Modify boot.c to initialise MMA8451Q and measurements before entering the warp menu
  */
-	#define SCALE_FACTOR 4096  // For ±2g sensitivity range
-	#define GRAVITY 9.81       // Acceleration due to gravity in m/s²
-	#define CONVERSION_FACTOR 1000  // Converting to mm/s²
-    // Initialize the MMA8451Q sensor
+	//Initialize the MMA8451Q sensor
 	initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
-	OSA_TimeDelay(5000);
-	//configureSensorMMA8451Q(0x00, 0x01);  // Configure the sensor for active mode and with suitable settings
+	OSA_TimeDelay(500);
+	// readAndConvertAccelerations();
 
-    // Variables to store acceleration data
-    int16_t accelerationX, accelerationY, accelerationZ;   // counts 
-	int accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2;
-
-
-    // Read X-axis data
-    WarpStatus statusX = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_X_MSB, 2);
-    if (statusX == kWarpStatusOK) {
-        accelerationX = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
-        accelerationX = (accelerationX ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
-		accelerationX_mm_s2 = (int)((float)accelerationX / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
-	} else {
-        warpPrint("Error reading X-axis data\n");
-    }
-
-    // Read Y-axis data
-    WarpStatus statusY = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Y_MSB, 2);
-    if (statusY == kWarpStatusOK) {
-        accelerationY = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
-        accelerationY = (accelerationY ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
-		accelerationY_mm_s2 = (int)((float)accelerationY / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
-	
-    } else {
-        warpPrint("Error reading Y-axis data\n");
-    }
-
-    // Read Z-axis data
-    WarpStatus statusZ = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Z_MSB, 2);
-    if (statusZ == kWarpStatusOK) {
-        accelerationZ = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
-        accelerationZ = (accelerationZ ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
-		accelerationZ_mm_s2 = (int)((float)accelerationZ / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
-    } else {
-        warpPrint("Error reading Z-axis data\n");
-    }
-
-    // Print the collected acceleration data
-    warpPrint("Acceleration Data(counts): X = %d, Y = %d, Z = %d\n", accelerationX, accelerationY, accelerationZ);
-	// Print the collected acceleration data in m/s²
-    warpPrint("Acceleration Data(mm/s²): X = %d, Y = %d, Z = %d\n", accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+	while (totalSamples < BUFFER_SIZE)
+	{
+		// readAndConvertAccelerations();
+		// // Assuming you convert the read values to mm/s² inside this function
+		// addSampleToBuffer(accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+		// Read the current acceleration data and store it in a struct
+    	readAndConvertAccelerations();
+		// Add the acceleration data to the buffer
+    	//addSampleToBuffer(accelerationX_m_s2, accelerationY_m_s2, accelerationZ_m_s2);
+		totalSamples++;
+		OSA_TimeDelay(500); // Delay as per your requirement
+	}
 
 
 

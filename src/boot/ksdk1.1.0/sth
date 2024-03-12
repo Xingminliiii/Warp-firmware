@@ -1,0 +1,57 @@
+ 
+	#define BUFFER_SIZE 500      // Buffer size for 10 seconds of data at 50 Hz
+
+	// Buffer for storing recent acceleration data in mm/s²
+	int accelerationBufferX[BUFFER_SIZE];
+	int accelerationBufferY[BUFFER_SIZE];
+	int accelerationBufferZ[BUFFER_SIZE];
+	int totalSamples = 0;
+	// Variables to store acceleration data
+    int16_t accelerationX, accelerationY, accelerationZ;   // counts 
+	int accelerationX_m_s2, accelerationY_m_s2, accelerationZ_m_s2;
+
+	// Index for the current position in the buffer
+	int currentIndex = 0;
+
+	// Function to add new samples to the buffer
+	void addSampleToBuffer(int accelerationX_m_s2, int accelerationY_m_s2, int accelerationZ_m_s2) 
+    {
+		accelerationBufferX[currentIndex] = accelerationX_m_s2;
+		accelerationBufferY[currentIndex] = accelerationY_m_s2;
+		accelerationBufferZ[currentIndex] = accelerationZ_m_s2;
+		currentIndex = (currentIndex + 1) % BUFFER_SIZE;  // Wrap index if needed
+	}
+    // Initialize the MMA8451Q sensor
+	initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
+	OSA_TimeDelay(500);
+
+	
+	while (totalSamples < BUFFER_SIZE)
+    {
+    readAndConvertAccelerations();
+
+    totalSamples++;
+    OSA_TimeDelay(20); 
+	}
+
+	#define SVM_THRESHOLD (4.1 * GRAVITY)  // Convert 4.1g to m/s^2
+	#define THETA_THRESHOLD 1.222  // Convert 70 degrees to radians
+
+	// Include the classifyFall function implementation
+	void classifyFall(int ax, int ay, int az, bool *fall_detected) {
+		float svm = sqrt(ax * ax + ay * ay + az * az);
+		float theta = atan2(sqrt(ax * ax + az * az), ay);
+
+		if (svm > SVM_THRESHOLD && theta > THETA_THRESHOLD) {
+			*fall_detected = true;
+		} else {
+			*fall_detected = false;
+		}
+	}
+	classifyFall(accelerationX_m_s2, accelerationY_m_s2, accelerationZ_m_s2, &fall_detected);
+	if (fall_detected) {
+		// Implement reaction to fall detection, such as sending an alert or logging the event
+		warpPrint("Fall detected!\n");
+	} else {
+		warpPrint("Fall not detected!\n");
+    }

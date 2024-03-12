@@ -36,6 +36,7 @@
 	POSSIBILITY OF SUCH DAMAGE.
 */
 #include <stdlib.h>
+#include <math.h>
 
 /*
  *	config.h needs to come first
@@ -421,3 +422,72 @@ appendSensorDataMMA8451Q(uint8_t* buf)
 	}
 	return index;
 }
+
+// Global buffer and index definitions
+#define BUFFER_SIZE 20 //record the data every 0.5s
+int accelerationBufferX[BUFFER_SIZE];
+int accelerationBufferY[BUFFER_SIZE];
+int accelerationBufferZ[BUFFER_SIZE];
+int totalSamples = 0;
+int currentIndex = 0;
+
+void addSampleToBuffer(int accelerationX_mm_s2, int accelerationY_mm_s2, int accelerationZ_mm_s2) {
+    accelerationBufferX[currentIndex] = accelerationX_mm_s2;
+    accelerationBufferY[currentIndex] = accelerationY_mm_s2;
+    accelerationBufferZ[currentIndex] = accelerationZ_mm_s2;
+    currentIndex = (currentIndex + 1) % BUFFER_SIZE;  // Wrap index if needed
+}
+
+#define SVM_THRESHOLD (4.1 * 9.81*1000)  // Convert 4.1g to m/s^2
+#define THETA_THRESHOLD 1.222  // Convert 70 degrees to radians
+
+void readAndConvertAccelerations() {
+	// Define constants for scale factor, gravity, and conversion to mm/s^2
+	#define SCALE_FACTOR 4096  // For ±2g sensitivity range
+	#define GRAVITY 9.81       // Acceleration due to gravity in m/s²
+	#define CONVERSION_FACTOR 1000  // Converting to mm/s²
+
+    // Variables to store acceleration data
+    int16_t accelerationX, accelerationY, accelerationZ;   // counts 
+    int accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2;
+	//bool fall_detected = false; 
+
+    // Read X-axis data
+    WarpStatus statusX = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_X_MSB, 2);
+    if (statusX == kWarpStatusOK) {
+        accelerationX = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
+        accelerationX = (accelerationX ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
+        accelerationX_mm_s2 = (int)((float)accelerationX / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
+    } else {
+        warpPrint("Error reading X-axis data\n");
+    }
+
+    // Read Y-axis data
+    WarpStatus statusY = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Y_MSB, 2);
+    if (statusY == kWarpStatusOK) {
+        accelerationY = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
+        accelerationY = (accelerationY ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
+        accelerationY_mm_s2 = (int)((float)accelerationY / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
+    } else {
+        warpPrint("Error reading Y-axis data\n");
+    }
+
+    // Read Z-axis data
+    WarpStatus statusZ = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Z_MSB, 2);
+    if (statusZ == kWarpStatusOK) {
+        accelerationZ = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
+        accelerationZ = (accelerationZ ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
+        accelerationZ_mm_s2 = (int)((float)accelerationZ / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
+    } else {
+        warpPrint("Error reading Z-axis data\n");
+    }
+	addSampleToBuffer(accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+    // Print the collected acceleration data
+    warpPrint("Acceleration Data(counts): X = %d, Y = %d, Z = %d\n", accelerationX, accelerationY, accelerationZ);
+    // Print the collected acceleration data in mm/s²
+    warpPrint("Acceleration Data(mm/s²): X = %d, Y = %d, Z = %d\n", accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+
+}
+
+
+
