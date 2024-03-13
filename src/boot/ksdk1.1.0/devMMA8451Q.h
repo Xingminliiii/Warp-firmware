@@ -53,17 +53,9 @@ extern int accelerationX_mm_s2;
 extern int accelerationY_mm_s2;
 extern int accelerationZ_mm_s2;
 void readAndConvertAccelerations();
-
 #define BUFFER_SIZE 20 // Buffer size for 10 seconds of data at 5 Hz
-// // Declarations for the acceleration buffers
-// extern int accelerationBufferX[BUFFER_SIZE];
-// extern int accelerationBufferY[BUFFER_SIZE];
-// extern int accelerationBufferZ[BUFFER_SIZE];
+
 extern int totalSamples; // Total samples recorded
 // extern int currentIndex; // Current index in the buffer
 
-// // Declaration for the function to add a sample to the buffers
-// void addSampleToBuffer(int accelerationX_m_s2, int accelerationY_m_s2, int accelerationZ_m_s2);
-extern bool fall_detected = false;
-extern float svm;
-extern float theta; 
+

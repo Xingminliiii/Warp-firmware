@@ -1944,19 +1944,11 @@ main(void)
 	OSA_TimeDelay(500);
 	// readAndConvertAccelerations();
 
-	while (totalSamples < BUFFER_SIZE)
+	for (int i = 0; i < 20; i++)
 	{
-		// readAndConvertAccelerations();
-		// // Assuming you convert the read values to mm/s² inside this function
-		// addSampleToBuffer(accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
-		// Read the current acceleration data and store it in a struct
     	readAndConvertAccelerations();
-		// Add the acceleration data to the buffer
-    	//addSampleToBuffer(accelerationX_m_s2, accelerationY_m_s2, accelerationZ_m_s2);
-		totalSamples++;
 		OSA_TimeDelay(500); // Delay as per your requirement
 	}
-
 
 
 
