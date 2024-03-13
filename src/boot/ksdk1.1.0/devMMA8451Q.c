@@ -490,7 +490,7 @@ void readAndConvertAccelerations() {
 	//int theta =0; 
 
 	//bool fall_detected = false; 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 20; i++)
 	{
     	// Read X-axis data
 		WarpStatus statusX = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_X_MSB, 2);
