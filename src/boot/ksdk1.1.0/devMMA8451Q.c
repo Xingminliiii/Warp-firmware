@@ -424,14 +424,12 @@ appendSensorDataMMA8451Q(uint8_t* buf)
 }
 
 
-#define SVM_THRESHOLD (4.1 * 9.81*1000)  // Convert 4.1g to m/s^2
-#define THETA_THRESHOLD 1.222  // Convert 70 degrees to radians
+#define SVM_THRESHOLD (4.1 * 9.81 * 1000)  // Convert 4.1g to m/s^2
+#define tangentTHETA_THRESHOLD 274  // Convert 70 degrees to radians
 
-void analyzeFallDetection(int svm) 
+void analyzeFallDetection(int svm, float theta) 
 {
     bool fallDetected = false;
-    // Calculate the Sum Vector Magnitude (SVM)
-    //float svm = sqrt(ax * ax + ay * ay + az * az);
 
     // Calculate THETA (angle)
     //float theta = atan2(sqrt(ax * ax + az * az), ay); // Theta is in radians
@@ -440,7 +438,7 @@ void analyzeFallDetection(int svm)
     // if (svm > SVM_THRESHOLD && theta > THETA_THRESHOLD) {
     //     fallDetected = true;
     //     }
-	    if (svm > SVM_THRESHOLD) {
+	    if (svm > SVM_THRESHOLD && theta > tangentTHETA_THRESHOLD) {
         fallDetected = true;
         }
 
@@ -474,6 +472,7 @@ int sqrtInt(int base){ // Step 1: calculate the magnitude of the acceleration us
 }
 
 
+
 void readAndConvertAccelerations() {
 	// Define constants for scale factor, gravity, and conversion to mm/s^2
 	#define SCALE_FACTOR 4096  // For ±2g sensitivity range
@@ -487,6 +486,8 @@ void readAndConvertAccelerations() {
 	int sumY = 0;
 	int sumZ = 0; 
 	int svm = 0;
+	int theta_ele =0;
+	//int theta =0; 
 
 	//bool fall_detected = false; 
 	for (int i = 0; i < 5; i++)
@@ -530,10 +531,20 @@ void readAndConvertAccelerations() {
 	svm = sqrtInt(meanX * meanX + meanY * meanY + meanZ * meanZ);
   
 	//int svm = sqrt(meanX * meanX + meanY * meanY + meanZ * meanZ);
-	warpPrint("SVM = %d",svm);
-	//analyzeFallDetection(meanX, meanY, meanZ);
-	analyzeFallDetection(svm);
+	warpPrint("SVM = %d\n",svm);
 
+	// Calculate THETA (angle)
+	theta_ele = sqrtInt(meanX * meanX + meanZ * meanZ);
+	warpPrint("theta_ele = %d\n",theta_ele);
+	int tangentTHETA = theta_ele *100 / meanY;
+	warpPrint("tangentTHETA = %d\n",tangentTHETA);
+	analyzeFallDetection(svm,tangentTHETA);
+
+	// float theta = atan2(theta_ele,meanY);
+	// warpPrint("theta = %f\n",theta);
+    //float theta = atan2(sqrt(ax * ax + az * az), ay); // Theta is in radians
+	//theta = calculate_theta(theta_ele, meanY);
+	//warpPrint("theta = %d\n",theta);
 }
 
 
