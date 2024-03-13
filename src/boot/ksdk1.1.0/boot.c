@@ -1942,13 +1942,14 @@ main(void)
 	//Initialize the MMA8451Q sensor
 	initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 	OSA_TimeDelay(500);
+	readAndConvertAccelerations();
 	// readAndConvertAccelerations();
 
-	for (int i = 0; i < 20; i++)
-	{
-    	readAndConvertAccelerations();
-		OSA_TimeDelay(500); // Delay as per your requirement
-	}
+	// for (int i = 0; i < 20; i++)
+	// {
+    // 	readAndConvertAccelerations();
+	// 	OSA_TimeDelay(500); // Delay as per your requirement
+	// }
 
 
 

@@ -427,31 +427,50 @@ appendSensorDataMMA8451Q(uint8_t* buf)
 #define SVM_THRESHOLD (4.1 * 9.81*1000)  // Convert 4.1g to m/s^2
 #define THETA_THRESHOLD 1.222  // Convert 70 degrees to radians
 
-void analyzeFallDetection(int ax, int ay, int az) 
+void analyzeFallDetection(int svm) 
 {
     bool fallDetected = false;
-
-    // float ax = accelerationX_mm_s2;
-    // float ay = accelerationY_mm_s2;
-    // float az = accelerationZ_mm_s2;
-
     // Calculate the Sum Vector Magnitude (SVM)
-    float svm = sqrt(ax * ax + ay * ay + az * az);
+    //float svm = sqrt(ax * ax + ay * ay + az * az);
 
     // Calculate THETA (angle)
-    float theta = atan2(sqrt(ax * ax + az * az), ay); // Theta is in radians
+    //float theta = atan2(sqrt(ax * ax + az * az), ay); // Theta is in radians
 
     // Check fall condition
-    if (svm > SVM_THRESHOLD && theta > THETA_THRESHOLD) {
+    // if (svm > SVM_THRESHOLD && theta > THETA_THRESHOLD) {
+    //     fallDetected = true;
+    //     }
+	    if (svm > SVM_THRESHOLD) {
         fallDetected = true;
         }
-
 
     if (fallDetected) {
         warpPrint("Fall detected\n");
     } else {
         warpPrint("No fall detected\n");
     }
+}
+
+int sqrtInt(int base){ // Step 1: calculate the magnitude of the acceleration using Pythagoras' theorem across three cartesian axes.
+  if(base == 0 || base == 1){ // If the number equals 0 or 1, the root equals the base.
+    return base;
+  }
+  else{
+    int root = base / 8; // Guess the square root at first.
+    // warpPrint("sqrtInt(): Square rooting the number %d.\n", base);
+    while(1){ // Perform this iterative result until the square root is calculated.
+      int oldRoot = root; // Save the old root to compare the new one to.
+      root = (root / 2) + (base / (2 * root));
+      if(abs(root - oldRoot) <= 1){ // <= 1 to prevent the result hopping between two adjacent numbers and failing to converge.
+	// warpPrint("sqrtInt(): Square root of %d = %d mms^-2.\n", base, root + 1);
+        return (root + 1); // Add 1 to round up, so the final square root result is accurate.
+      }
+      else{
+        // warpPrint("sqrtInt(): Guessed the number %d.\n", root);
+        // warpPrint("sqrtInt(): %d != %d.\n", root, oldRoot);  
+      }
+    }
+  }
 }
 
 
@@ -464,34 +483,57 @@ void readAndConvertAccelerations() {
     // Variables to store acceleration data
     int16_t accelerationX, accelerationY, accelerationZ;   // counts 
     int accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2;
+	int sumX = 0;
+	int sumY = 0;
+	int sumZ = 0; 
+	int svm = 0;
 
 	//bool fall_detected = false; 
+	for (int i = 0; i < 5; i++)
+	{
+    	// Read X-axis data
+		WarpStatus statusX = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_X_MSB, 2);
+		accelerationX = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
+		accelerationX = (accelerationX ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
+		accelerationX_mm_s2 = (int)((float)accelerationX / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
 
-    // Read X-axis data
-    WarpStatus statusX = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_X_MSB, 2);
-    accelerationX = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
-    accelerationX = (accelerationX ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
-    accelerationX_mm_s2 = (int)((float)accelerationX / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
+		// Read Y-axis data
+		WarpStatus statusY = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Y_MSB, 2);
+		accelerationY = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
+		accelerationY = (accelerationY ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
+		accelerationY_mm_s2 = (int)((float)accelerationY / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
 
+		// Read Z-axis data
+		WarpStatus statusZ = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Z_MSB, 2);
+		accelerationZ = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
+		accelerationZ = (accelerationZ ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
+		accelerationZ_mm_s2 = (int)((float)accelerationZ / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
 
-    // Read Y-axis data
-    WarpStatus statusY = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Y_MSB, 2);
-    accelerationY = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
-    accelerationY = (accelerationY ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
-    accelerationY_mm_s2 = (int)((float)accelerationY / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
+		//addSampleToBuffer(accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+		//Print the collected acceleration data
+		warpPrint("Acceleration Data(counts): X = %d, Y = %d, Z = %d\n", accelerationX, accelerationY, accelerationZ);
+		// Print the collected acceleration data in mm/s²
+		warpPrint("Acceleration Data(mm/s²): X = %d, Y = %d, Z = %d\n", accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+		sumX += accelerationX_mm_s2; 
+		sumY += accelerationY_mm_s2; 
+		sumZ += accelerationZ_mm_s2;
+		// sumX += accelerationX; 
+		// sumY += accelerationY;
+		// sumZ += accelerationZ;
+		OSA_TimeDelay(500); // Delay as per your requirement
+	}
 
-    // Read Z-axis data
-    WarpStatus statusZ = readSensorRegisterMMA8451Q(kWarpSensorOutputRegisterMMA8451QOUT_Z_MSB, 2);
-    accelerationZ = (deviceMMA8451QState.i2cBuffer[0] << 6) | (deviceMMA8451QState.i2cBuffer[1] >> 2);
-    accelerationZ = (accelerationZ ^ (1 << 13)) - (1 << 13);  // Convert to 16-bit signed value
-    accelerationZ_mm_s2 = (int)((float)accelerationZ / SCALE_FACTOR * GRAVITY * CONVERSION_FACTOR);  // Convert to mm/s²
+	int meanX = sumX / 5;
+	int meanY = sumY / 5;
+	int meanZ = sumZ / 5;
+	warpPrint("meanX = %d, meanY = %d, meanZ = %d\n", meanX, meanY, meanZ);
+	svm = sqrtInt(meanX * meanX + meanY * meanY + meanZ * meanZ);
+  
+	//int svm = sqrt(meanX * meanX + meanY * meanY + meanZ * meanZ);
+	warpPrint("SVM = %d",svm);
+	//analyzeFallDetection(meanX, meanY, meanZ);
+	analyzeFallDetection(svm);
 
-	//addSampleToBuffer(accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
-    // Print the collected acceleration data
-    warpPrint("Acceleration Data(counts): X = %d, Y = %d, Z = %d\n", accelerationX, accelerationY, accelerationZ);
-    // Print the collected acceleration data in mm/s²
-    warpPrint("Acceleration Data(mm/s²): X = %d, Y = %d, Z = %d\n", accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
-	analyzeFallDetection(accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
 }
 
 
