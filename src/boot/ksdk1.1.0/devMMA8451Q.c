@@ -70,7 +70,8 @@ initMMA8451Q(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
 {
 	deviceMMA8451QState.i2cAddress			= i2cAddress;
 	deviceMMA8451QState.operatingVoltageMillivolts	= operatingVoltageMillivolts;
-
+	//writeSensorRegisterMMA8451Q(kWarpSensorConfigurationRegisterMMA8451QCTRL_REG1, 0x05)
+	write2a();
 	return;
 }
 
@@ -423,6 +424,12 @@ appendSensorDataMMA8451Q(uint8_t* buf)
 	return index;
 }
 
+/*enable acc reading*/
+void write2a(){
+	uint8_t ctrl1=0x05;
+
+	writeSensorRegisterMMA8451Q(kWarpSensorConfigurationRegisterMMA8451QCTRL_REG1, ctrl1);
+}
 
 #define SVM_THRESHOLD (4.1 * 9.81 * 1000)  // Convert 4.1g to m/s^2
 #define tangentTHETA_THRESHOLD 274  // Convert 70 degrees to radians
@@ -514,7 +521,7 @@ void readAndConvertAccelerations() {
 		//Print the collected acceleration data
 		warpPrint("Acceleration Data(counts): X = %d, Y = %d, Z = %d\n", accelerationX, accelerationY, accelerationZ);
 		// Print the collected acceleration data in mm/s²
-		warpPrint("Acceleration Data(mm/s²): X = %d, Y = %d, Z = %d\n", accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
+		//warpPrint("Acceleration Data(mm/s²): X = %d, Y = %d, Z = %d\n", accelerationX_mm_s2, accelerationY_mm_s2, accelerationZ_mm_s2);
 		sumX += accelerationX_mm_s2; 
 		sumY += accelerationY_mm_s2; 
 		sumZ += accelerationZ_mm_s2;
