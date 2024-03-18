@@ -59,3 +59,13 @@ extern int totalSamples; // Total samples recorded
 // extern int currentIndex; // Current index in the buffer
 
 
+typedef struct {
+    int accelerationX[BUFFER_SIZE];
+    int accelerationY[BUFFER_SIZE];
+    int accelerationZ[BUFFER_SIZE];
+    int SVM[BUFFER_SIZE];
+    bool fallDetected[BUFFER_SIZE];
+} SensorBuffers;
+
+
+

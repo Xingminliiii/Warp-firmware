@@ -1942,16 +1942,46 @@ main(void)
 	//Initialize the MMA8451Q sensor
 	initMMA8451Q(	0x1D	/* i2cAddress */,	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 	OSA_TimeDelay(500);
-	readAndConvertAccelerations();
-	// readAndConvertAccelerations();
 
-	// for (int i = 0; i < 20; i++)
-	// {
-    // 	readAndConvertAccelerations();
-	// 	OSA_TimeDelay(500); // Delay as per your requirement
-	// }
+	//Define the buffers
+	SensorBuffers buffers; // Declare an instance of SensorBuffers
+    int currentBufferIndex = 0; // Maintain a current index for your buffer
+	bool fall_detected = false;
+	for (int i = 0; i < BUFFER_SIZE; i++)
+	{
+		//Read the acceleration values
+		int32_t ax, ay, az;
+		readAndConvertAccelerations(&ax, &ay, &az);
+		warpPrint("Acceleration(mm/s^2): x = %d, y = %d, z = %d\n", ax, ay, az);
 
+		//Calculate the SVM
+		int svm = sqrtInt(ax*ax + ay*ay + az*az);
+		warpPrint("SVM (mm/s^2)= %d\n",svm);
 
+		//Detect the fall
+		fall_detected = analyzeFallDetection(svm);
+		warpPrint("Fall detected = %d\n",fall_detected);
+
+		//Add the sample to the buffer
+		addSampleToBuffer(&buffers, currentBufferIndex, ax, ay, az, svm, fall_detected);
+
+		// Update the buffer index properly
+		currentBufferIndex = (currentBufferIndex + 1) % BUFFER_SIZE;
+
+		OSA_TimeDelay(500); // Delay as per your requirement
+	}
+	
+	//Check for fall detection
+	bool check_fall = checkForDetectedFalls(buffers.fallDetected, BUFFER_SIZE);
+	
+	if (check_fall)
+	{
+		warpPrint("Fall detected in the last 10 seconds\n");
+	}
+	else
+	{
+		warpPrint("No fall detected in the last 10 seconds\n");
+	}
 
 	warpPrint("Press any key to show menu...\n");
 	gWarpExtraQuietMode = _originalWarpExtraQuietMode;

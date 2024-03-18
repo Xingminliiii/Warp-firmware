@@ -1,3 +1,14 @@
+# 4B25 COURSEWORK4 - FALL DETECTION 
+## Name: Xingmin Li College: Lucy Cavendish CRSid: xl604
+ In this coursework, a simple fall detection system is developed, which uses the MMA8451Q accelerometer to recorded to acceleration measurements in x,y,z axis, and a thresholding algorithm is applied identify whether a people falls.
+
+# General introduction
+The acceleration measurements are recorded at half-second intervals over a period of 10 seconds. Upon initializing the MMA8451Q sensor, the system captures acceleration data (ax,ay,az) and computes the SVM \( SVM = \sqrt{a_x^2 + a_y^2 + a_z^2} \) for each data set. A fall is detected if the SVM exceeds the threshold of 40.2 m/s2 (equivalent to 4.1g). Otherwise, the system marks the fall detection as false. Throughout the 10-second window, 20 sets of measurements are analyzed and stored in the 'Sensorbuffer'. After completing the measurements, the system reviews the fall detection outcomes from the Sensorbuffer to determine if a fall occurred within the last 10 seconds. If all results are negative, the message “No fall detected in the last 10 seconds” is displayed. 
+
+
+# File layout
+
+
 # Baseline firmware for the [Warp](https://github.com/physical-computation/Warp-hardware) family of hardware platforms
 This is the firmware for the [Warp hardware](https://github.com/physical-computation/Warp-hardware) and its publicly available and unpublished derivatives. This firmware also runs on the Freescale/NXP FRDM KL03 evaluation board which we use for teaching at the University of Cambridge. When running on platforms other than Warp, only the sensors available in the corresponding hardware platform are accessible.
 
