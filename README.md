@@ -15,13 +15,20 @@ Launch `JLinkRTTClient` in another terminal before loading the warp firmware, th
 
 # File layout
 **boot.c**: The code is added at line 1939-1984, in which it uses the functions defined in 'devMMA8451Q.c' and then implement the detection algorithm descriped in 'General introduction'. 
+
 **devMMA8451Q.c**: Several functions are defined in the driver file, including: 
 `analyzeFallDetection()`: analyse whether SVM > threshold
+
 `sqrtInt()`: calculate squre root of a value
+
 `addSampleToBuffer`: add recorded measurements and detection results into Sensor buffer
+
 `checkForDetectedFalls`: check whether there is fall detection result = true in the 20 sets of data
+
 `readAndConvertAccelerations`: read acclerometer count and convert it to acceleration(mm/s^2)
+
 **devMMA8451Q.h**: add Sensorbuff struct
+
 **Folder:data**: In this folder, I upload several dataset recorded by MMA8451Q during different activities, and then calculate their SVMs. I then compare the SVM signal with the threshold to justify whether my threshold used is appropriate. 
 
 # Baseline firmware for the [Warp](https://github.com/physical-computation/Warp-hardware) family of hardware platforms
