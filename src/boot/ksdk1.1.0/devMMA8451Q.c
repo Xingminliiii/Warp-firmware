@@ -470,7 +470,7 @@ int sqrtInt(int base){
       root = (root / 2) + (base / (2 * root));
       if(abs(root - oldRoot) <= 1)
 	  { 
-        return (root + 1); .
+        return (root + 1);
       }
     }
   }

@@ -1,13 +1,28 @@
 # 4B25 COURSEWORK4 - FALL DETECTION 
-## Name: Xingmin Li College: Lucy Cavendish CRSid: xl604
+### Name: Xingmin Li
+### College: Lucy Cavendish 
+### CRSid: xl604
  In this coursework, a simple fall detection system is developed, which uses the MMA8451Q accelerometer to recorded to acceleration measurements in x,y,z axis, and a thresholding algorithm is applied identify whether a people falls.
 
 # General introduction
 The acceleration measurements are recorded at half-second intervals over a period of 10 seconds. Upon initializing the MMA8451Q sensor, the system captures acceleration data (ax,ay,az) and computes the SVM \( SVM = \sqrt{a_x^2 + a_y^2 + a_z^2} \) for each data set. A fall is detected if the SVM exceeds the threshold of 40.2 m/s2 (equivalent to 4.1g). Otherwise, the system marks the fall detection as false. Throughout the 10-second window, 20 sets of measurements are analyzed and stored in the 'Sensorbuffer'. After completing the measurements, the system reviews the fall detection outcomes from the Sensorbuffer to determine if a fall occurred within the last 10 seconds. If all results are negative, the message “No fall detected in the last 10 seconds” is displayed. 
 
+# Implementation of this algorithm 
+Build the Warp firmware by `make frdmkl03`
+Load the Warp firmware to hardware by `make load-warp`
+Launch `JLinkRTTClient` in another terminal before loading the warp firmware, the detection algorithm will run before entering the warp menu. 
+
 
 # File layout
-
+**boot.c**: The code is added at line 1939-1984, in which it uses the functions defined in 'devMMA8451Q.c' and then implement the detection algorithm descriped in 'General introduction'. 
+**devMMA8451Q.c**: Several functions are defined in the driver file, including: 
+`analyzeFallDetection()`: analyse whether SVM > threshold
+`sqrtInt()`: calculate squre root of a value
+`addSampleToBuffer`: add recorded measurements and detection results into Sensor buffer
+`checkForDetectedFalls`: check whether there is fall detection result = true in the 20 sets of data
+`readAndConvertAccelerations`: read acclerometer count and convert it to acceleration(mm/s^2)
+**devMMA8451Q.h**: add Sensorbuff struct
+**Folder:data**: In this folder, I upload several dataset recorded by MMA8451Q during different activities, and then calculate their SVMs. I then compare the SVM signal with the threshold to justify whether my threshold used is appropriate. 
 
 # Baseline firmware for the [Warp](https://github.com/physical-computation/Warp-hardware) family of hardware platforms
 This is the firmware for the [Warp hardware](https://github.com/physical-computation/Warp-hardware) and its publicly available and unpublished derivatives. This firmware also runs on the Freescale/NXP FRDM KL03 evaluation board which we use for teaching at the University of Cambridge. When running on platforms other than Warp, only the sensors available in the corresponding hardware platform are accessible.
