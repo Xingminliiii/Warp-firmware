@@ -1971,7 +1971,7 @@ main(void)
 		OSA_TimeDelay(500); // Delay as per your requirement
 	}
 	
-	//Check for fall detection
+	//Check for fall detection//
 	bool check_fall = checkForDetectedFalls(buffers.fallDetected, BUFFER_SIZE);
 	
 	if (check_fall)
